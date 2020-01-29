@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 
 const Person = ({ person }) => {
   return (
@@ -19,46 +19,46 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [searchString, setSearchString] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  useEffect(() => {
+    const results = persons.filter(person =>
+      person.name.toLocaleLowerCase().includes(searchString.toLocaleLowerCase()),
+      );
+    setSearchResults(results);
+  }, [searchString]);
 
   const addName = event => {
     event.preventDefault();
     let nameObj = { name: newName, phone: newPhone };
     persons.some(entry => entry.name === newName)
       ? alert(`${newName} is already added to phonebook`)
-      : setPersons(persons.concat(nameObj));
+      : setSearchResults(persons.concat(nameObj));
     setNewName('');
     setNewPhone('');
   };
   const handleChangeName = event => {
-    console.log(event.target.value);
+    // console.log(event.target.value);
     setNewName(event.target.value);
   };
 
   const handleChangePhone = event => {
-    console.log(event.target.value);
+    // console.log(event.target.value);
     setNewPhone(event.target.value);
   };
 
   const handleSearch = event => {
     setSearchString(event.target.value);
-
-    const result = persons.filter(person =>
-      person.name.toLocaleLowerCase().includes(searchString.toLocaleLowerCase()),
-    );
-    setPersons(result);
-    //debugger;
-
-    //setSearchString('');
   };
 
-  const rows = () => persons.map(person => <Person key={person.name} person={person} />);
+  const rows = () => searchResults.map(person => <Person key={person.name} person={person} />);
 
   return (
     <div>
       <h2>Phonebook</h2>
       <br />
       <div>
-        filter shown with <input value={searchString} onChange={handleSearch} id="olu" />
+        filter shown with <input type="text" value={searchString} onChange={handleSearch} id="olu" placeholder="Search..."/>
       </div>
       <br />
       <h2>add a new</h2>
