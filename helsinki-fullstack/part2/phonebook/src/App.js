@@ -1,82 +1,182 @@
-import React, { useState } from 'react';
-
-const Person = ({ person }) => {
-  return (
-    <div>
-      {person.name} {person.phone}
-    </div>
-  );
-};
+import React, { useState, useEffect } from 'react';
+import Filter from './Filter';
+import PersonForm from './PersonForm';
+import Persons from './Persons';
+import personService from './service/personService';
+import ErrorNotification from './ErrorNotification';
+import SuccessNotification from './SuccessNotification';
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', phone: '040-123456' },
-    { name: 'Ada Lovelace', phone: '39-44-5323523' },
-    { name: 'Dan Abramov', phone: '12-43-234345' },
-    { name: 'Mary Poppendieck', phone: '39-23-6423122' },
-  ]);
-
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [searchString, setSearchString] = useState('');
+  const [addBtnColor, setAddBtnColor] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  useEffect(() => {
+    personService
+      .getAll()
+      .then(peopleResponse => {
+        setPersons(peopleResponse);
+      })
+      .catch(error => console.dir(error));
+  }, []);
 
   const addName = event => {
     event.preventDefault();
+    setAddBtnColor('#429bf5');
     let nameObj = { name: newName, phone: newPhone };
-    persons.some(entry => entry.name === newName)
-      ? alert(`${newName} is already added to phonebook`)
-      : setPersons(persons.concat(nameObj));
-    setNewName('');
-    setNewPhone('');
+
+    const filteredContact = filterItems(persons, nameObj.name);
+    if (filteredContact.length === 0) {
+      setTimeout(() => {
+        personService
+          .create(nameObj)
+          .then(personResponse => {
+            setPersons(persons.concat(personResponse));
+            setAddBtnColor('');
+            setNewName('');
+            setNewPhone('');
+            setSuccessMessage(`${nameObj.name} added to Phonebook`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
+          })
+          .catch(err => {
+            setErrorMessage(
+              `Cannot add ${nameObj.name} to Phonebook try again later`,
+            );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
+          });
+      }, 0);
+    } else {
+      const [contactInfo] = filteredContact;
+      if (contactInfo.phone === nameObj.phone) {
+        setTimeout(() => {
+          let result = window.confirm(
+            `${contactInfo.name} is already added to phonebook, replace the old number with a new one`,
+          );
+          if (result) {
+            setNewName('');
+            setNewPhone('');
+            setAddBtnColor('');
+          } else {
+            setNewName(nameObj.name);
+            setNewPhone(nameObj.phone);
+            setAddBtnColor('');
+          }
+        }, 0);
+      } else {
+        //update the contact
+        const updatedContact = { ...contactInfo, phone: nameObj.phone };
+        setTimeout(() => {
+          personService
+            .update(contactInfo.id, updatedContact)
+            .then(response => {
+              setSuccessMessage(
+                `${nameObj.name} contact information updated successfully in Phonebook`,
+              );
+              setTimeout(() => {
+                setSuccessMessage(null);
+              }, 5000);
+              setPersons(
+                persons.map(people =>
+                  people.id !== contactInfo.id ? people : response,
+                ),
+              );
+              setNewName('');
+              setNewPhone('');
+              setAddBtnColor('');
+            })
+            .catch(err => {
+              setErrorMessage(
+                `${nameObj.name} contact information cannot be updated now try again later`,
+              );
+              setTimeout(() => {
+                setErrorMessage(null);
+              }, 5000);
+            });
+        }, 0);
+      }
+    }
   };
+
+  //for filtering array
+  const filterItems = (arr, query) => {
+    return arr.filter(el => el.name.toLowerCase() === query.toLowerCase());
+  };
+
+  const onDeleteHandler = person => {
+    personService
+      .deletePerson(person.id)
+      .then(response => {
+        setSuccessMessage(`${person.name} removed successfully from Phonebook`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 5000);
+        personService.getAll().then(response => setPersons(response));
+      })
+      .catch(err => {
+        setErrorMessage(
+          `Cannot delete ${person.name} from Phonebook try again later`,
+        );
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+      });
+  };
+
   const handleChangeName = event => {
-    console.log(event.target.value);
-    setNewName(event.target.value);
+    let inputName = event.target.value;
+    inputName = inputName
+      .split(' ')
+      .filter(input => input)
+      .join(' ');
+    setNewName(inputName);
   };
 
   const handleChangePhone = event => {
-    console.log(event.target.value);
     setNewPhone(event.target.value);
   };
 
   const handleSearch = event => {
     setSearchString(event.target.value);
-
-    const result = persons.filter(person =>
-      person.name.toLocaleLowerCase().includes(searchString.toLocaleLowerCase()),
-    );
-    setPersons(result);
-    //debugger;
-
-    //setSearchString('');
   };
 
-  const rows = () => persons.map(person => <Person key={person.name} person={person} />);
+  const listOfPeopleToShow = !searchString
+    ? persons
+    : persons.filter(item =>
+        item.name
+          .toLocaleLowerCase()
+          .includes(searchString.toLocaleLowerCase()),
+      );
+
+  const handler = {
+    newName,
+    newPhone,
+    addBtnColor,
+    handleChangeName,
+    handleChangePhone,
+    addName,
+    onDeleteHandler,
+  };
 
   return (
     <div>
       <h2>Phonebook</h2>
       <br />
-      <div>
-        filter shown with <input value={searchString} onChange={handleSearch} id="olu" />
-      </div>
+      <SuccessNotification message={successMessage} />
+      <ErrorNotification message={errorMessage} />
+      <Filter value={searchString} onChange={handleSearch} />
       <br />
-      <h2>add a new</h2>
-      <form onSubmit={addName}>
-        <div>
-          name: <input onChange={handleChangeName} value={newName} />
-        </div>
-        <div>
-          number: <input onChange={handleChangePhone} value={newPhone} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <h2>Add a new</h2>
+      <PersonForm handler={handler} />
       <h2>Numbers</h2>
-      <br />
-      <br />
-      {rows()}
+      <Persons listOfPeopleToShow={listOfPeopleToShow} handler={handler} />
     </div>
   );
 };
