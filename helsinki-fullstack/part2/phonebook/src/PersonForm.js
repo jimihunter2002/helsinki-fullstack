@@ -5,7 +5,7 @@ const PersonForm = ({ handler }) => {
     <>
       <form onSubmit={handler.addName}>
         <div>
-          name:{' '}
+          name:
           <input
             type='text'
             onChange={handler.handleChangeName}
@@ -15,7 +15,7 @@ const PersonForm = ({ handler }) => {
           />
         </div>
         <div>
-          number:{' '}
+          number:
           <input
             type='tel'
             onChange={handler.handleChangePhone}
