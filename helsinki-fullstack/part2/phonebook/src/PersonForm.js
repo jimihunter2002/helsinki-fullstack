@@ -10,6 +10,7 @@ const PersonForm = ({ handler }) => {
             type='text'
             onChange={handler.handleChangeName}
             value={handler.newName}
+            placeholder='Bobby Benson'
             required
           />
         </div>
