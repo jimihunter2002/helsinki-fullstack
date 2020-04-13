@@ -61,7 +61,7 @@ const App = () => {
             `${contactInfo.name} is already added to phonebook, replace the old number with a new one`,
           );
           if (result) {
-            setNewName('');
+            //setNewName('');
             setNewPhone('');
             setAddBtnColor('');
           } else {
@@ -98,7 +98,7 @@ const App = () => {
               );
               setTimeout(() => {
                 setErrorMessage(null);
-              }, 5000);
+              }, 4000);
             });
         }, 0);
       }
