@@ -46,7 +46,8 @@ const App = () => {
           })
           .catch(err => {
             setErrorMessage(
-              `Cannot add ${nameObj.name} to Phonebook try again later`,
+              // `Cannot add ${nameObj.name} to Phonebook try again later`,
+              err.response.data.error,
             );
             setTimeout(() => {
               setErrorMessage(null);
@@ -94,7 +95,8 @@ const App = () => {
             })
             .catch(err => {
               setErrorMessage(
-                `${nameObj.name} contact information cannot be updated now try again later`,
+                // `${nameObj.name} contact information cannot be updated now try again later`,
+                err.response.data.error,
               );
               setTimeout(() => {
                 setErrorMessage(null);
