@@ -1,5 +1,6 @@
 'use strict';
-const axios = require('axios');
+//const axios = require('axios');
+import axios from 'axios';
 
 // const baseUrl = 'http://localhost:3001/api/blogs';
 const baseUrl = '/api/blogs';
@@ -40,10 +41,18 @@ const deleteBlog = async id => {
   return response.data;
 };
 
-module.exports = {
+export default {
   getAll,
   create,
   setToken,
   update,
   deleteBlog,
 };
+
+// module.exports = {
+//   getAll,
+//   create,
+//   setToken,
+//   update,
+//   deleteBlog,
+// };

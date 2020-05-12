@@ -8,7 +8,8 @@ import SuccessNotification from './components/SuccessNotification';
 import ErrorNotification from './components/ErrorNotification';
 import utility from './utilities/utility';
 import Togglable from './components/Togglable';
-const blogService = require('../src/services/blogService');
+// const blogService = require('../src/services/blogService');
+import blogService from '../src/services/blogService';
 
 const baseUrl = 'http://localhost:3000';
 const App = () => {
