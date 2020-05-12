@@ -1,7 +1,8 @@
 'use strict';
 const axios = require('axios');
 
-const baseUrl = 'http://localhost:3001/api/blogs';
+// const baseUrl = 'http://localhost:3001/api/blogs';
+const baseUrl = '/api/blogs';
 
 var token = null;
 const setToken = newToken => {
