@@ -10,8 +10,9 @@ import utility from './utilities/utility';
 import Togglable from './components/Togglable';
 // const blogService = require('../src/services/blogService');
 import blogService from '../src/services/blogService';
+require('dotenv').config();
 
-const baseUrl = 'http://localhost:3000';
+const baseUrl = process.env.BASE_URL;
 const App = () => {
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
@@ -126,7 +127,7 @@ const App = () => {
 
   const onUpdateLikes = async (id, blogToupdate) => {
     try {
-      const returnedBlog = await blogService.update(id, blogToupdate);
+      await blogService.update(id, blogToupdate);
 
       fetchBlogs();
     } catch (error) {
